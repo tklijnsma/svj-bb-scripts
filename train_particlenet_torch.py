@@ -105,14 +105,15 @@ class ParticleNetDataset(torch.utils.data.Dataset):
                     fmax = np.max(feature)
                     left = q10 if abs(fmin/q10) < .7 else fmin
                     right = q90 if abs(q90/fmax) < .7 else fmax
-                    print(
-                        f'Normalizing feature {i_feature} from'
-                        f'({left:.3f}, {right:.3f} --> (0, 1)'
-                        )
                     lefts.append(left)
                     rights.append(right)
             self.lefts = lefts
             self.rights = rights
+            for i_feature in range(n_features):
+                print(
+                    f'Normalizing feature {i_feature} from'
+                    f'({self.lefts[i_feature]:.3f}, {self.rights[i_feature]:.3f} --> (0, 1)'
+                    )
 
             for i in tqdm.tqdm(range(n_events), total=n_events):
                 features = np.array(data[i].tolist())
@@ -167,8 +168,11 @@ def main():
     parser.add_argument('-n', '--nowrite', action='store_true')
     args = parser.parse_args()
     if args.reproc:
-        ParticleNetDataset('data/train/merged.npz', force_reproc=True)
-        ParticleNetDataset('data/test/merged.npz', force_reproc=True)
+        train_dataset = ParticleNetDataset('data/train/merged.npz', force_reproc=True)
+        ParticleNetDataset(
+            'data/test/merged.npz', force_reproc=True,
+            lefts=train_dataset.lefts, rights=train_dataset.rights
+            )
         return
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
