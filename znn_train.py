@@ -20,7 +20,7 @@ def main():
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print('Using device', device)
-    ckpt_dir = strftime('testckpts_znn_%b%d_%H%M%S')
+    ckpt_dir = strftime('ckpts_drn_%b%d_%H%M%S')
 
     n_epochs = 20
 
@@ -35,8 +35,6 @@ def main():
     bbefp.networks.print_model_summary(model)
 
     nsig = 0
-
-
     for data in tqdm.tqdm(train_loader, total=len(train_loader)):
         nsig += data.y.sum()
     s_over_n = float(nsig/len(train_loader.dataset))
