@@ -22,7 +22,7 @@ def main():
     print('Using device', device)
     ckpt_dir = strftime('ckpts_drn_%b%d_%H%M%S')
 
-    n_epochs = 20
+    n_epochs = 200
 
     batch_size = 16
     train_loader = bbefp.dataset.get_loader_ptetaphie('data/train/merged.npz', batch_size)
