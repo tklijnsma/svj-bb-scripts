@@ -2,6 +2,7 @@ import os
 import os.path as osp
 import math
 import tqdm
+import argparse
 
 import numpy as np
 import torch
@@ -13,7 +14,9 @@ from sklearn.metrics import confusion_matrix
 
 
 def main():
-
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-n', '--nowrite', action='store_true')
+    args = parser.parse_args()
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print('Using device', device)
@@ -44,9 +47,10 @@ def main():
     def write_checkpoint(checkpoint_number=None, best=False):
         ckpt = 'ckpt_best.pth.tar' if best else 'ckpt_{0}.pth.tar'.format(checkpoint_number)
         ckpt = osp.join(ckpt_dir, ckpt)
-        os.makedirs(ckpt_dir, exist_ok=True)
         if best: print('Saving epoch {0} as new best'.format(checkpoint_number))
-        torch.save(dict(model=model.state_dict()), ckpt)
+        if not args.nowrite:
+            os.makedirs(ckpt_dir, exist_ok=True)
+            torch.save(dict(model=model.state_dict()), ckpt)
 
     def train(epoch):
         print('Training epoch', epoch)
@@ -58,22 +62,13 @@ def main():
             optimizer.zero_grad()
             result = model(data)
             log_probabilities = torch.nn.functional.log_softmax(result, dim=1)
-            # pred = probabilities.argmax(1)
-            # print('probabilities=', probabilities)
-            # print('pred=', pred)
-            # print('data.y=', data.y)
-            # raise Exception
 
             # print('y =', data.y)
-            # print('result =', result)
-            # print('Sizes of y and result:', data.y.size(), result.size())
+            # print('log_probabilities =', log_probabilities)
+            # print('Sizes of y and log_probabilities:', data.y.size(), log_probabilities.size())
 
             loss = F.nll_loss(log_probabilities, data.y, weight=loss_weights)
             loss.backward()
-
-            #print(torch.unique(torch.argmax(result, dim=-1)))
-            #print(torch.unique(data.y))
-
             optimizer.step()
             scheduler.batch_step()
 
