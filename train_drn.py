@@ -7,6 +7,7 @@ import argparse
 import numpy as np
 import torch
 import torch.nn.functional as F
+from torch_geometric.data import DataLoader
 
 import bbefp
 from time import strftime
@@ -25,8 +26,13 @@ def main():
     n_epochs = 200
 
     batch_size = 16
-    train_loader = bbefp.dataset.get_loader_ptetaphie('data/train/merged.npz', batch_size)
-    test_loader = bbefp.dataset.get_loader_ptetaphie('data/test/merged.npz', batch_size)
+    load = lambda merged_file: DataLoader(
+        bbefp.dataset.DRNDataset(merged_file),
+        batch_size=batch_size, shuffle=True
+        )
+    train_loader = load('data/train/merged.awkd')
+    test_loader = load('data/test/merged.awkd')
+    
 
     epoch_size = len(train_loader.dataset)
     model = bbefp.networks.DynamicReductionNetwork(hidden_dim=64, k=16).to(device)
