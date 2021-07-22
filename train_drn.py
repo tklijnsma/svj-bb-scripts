@@ -25,7 +25,7 @@ def main():
 
     n_epochs = 200
 
-    batch_size = 16
+    batch_size = 32
     load = lambda merged_file: DataLoader(
         bbefp.dataset.DRNDataset(merged_file),
         batch_size=batch_size, shuffle=True
@@ -36,7 +36,7 @@ def main():
 
     epoch_size = len(train_loader.dataset)
     model = bbefp.networks.DynamicReductionNetwork(hidden_dim=64, k=16).to(device)
-    optimizer = torch.optim.AdamW(model.parameters(), lr=1e-5, weight_decay=1e-4)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=4e-5, weight_decay=1e-4)
     scheduler = bbefp.networks.CyclicLRWithRestarts(optimizer, batch_size, epoch_size, restart_period=400, t_mult=1.1, policy="cosine")
     bbefp.networks.print_model_summary(model)
 
